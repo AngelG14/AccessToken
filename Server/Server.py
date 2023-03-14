@@ -13,12 +13,10 @@ def tokenValidation(f):
         return f(*args,**kwargs)
     return decorated_function
 
-@app.route('/')
+@app.route('/', methods = ['GET'])
 def index():
     if request.method == 'GET':
         return render_template('index.html')
-    else:
-        return "bad request", 402
 
 @app.route('/login', methods = ['GET','POST'])
 def login():
@@ -28,22 +26,27 @@ def login():
         user = request.form['user']
         password = request.form['password']
         if userValidation(user,password):
-            response = make_response(redirect('/Youtube'))
+            response = make_response(redirect('/inicio'))
             response.set_cookie('access_token', generate_token(user))
             return response
         else:
-            return "Error de credenciales", 402
-    return "bad request", 402
+            return render_template("error.html"), 403
+
+@app.route('/inicio')
+@tokenValidation
+def inicio():
+    if request.method == 'GET':
+        return render_template("inicio.html")
 
 @app.route('/youtube')
 @tokenValidation
-def page():
+def youtube():
     if request.method == 'GET':
         return redirect('https://www.youtube.com/')
     
 @app.route('/gmail')
 @tokenValidation
-def page2():
+def gmail():
     if request.method == 'GET':
         return redirect('https://mail.google.com/')
 
